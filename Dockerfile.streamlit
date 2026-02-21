@@ -1,0 +1,28 @@
+# ========================================
+# Dockerfile for Streamlit UI
+# ========================================
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Streamlit and required packages
+RUN pip install --no-cache-dir \
+    streamlit==1.31.0 \
+    requests==2.31.0 \
+    plotly==5.18.0 \
+    pandas==2.2.0
+
+# Copy UI code
+COPY ./ui /app/ui
+
+# Expose Streamlit port
+EXPOSE 8501
+
+# Run Streamlit
+CMD ["streamlit", "run", "ui/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
