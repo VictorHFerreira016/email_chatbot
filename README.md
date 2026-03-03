@@ -34,60 +34,70 @@ Crie eventos automaticamente via chat
 Sincronização com sua agenda do Google
 
 ### **Arquitetura**
-
+```
 ┌─────────────────┐
-│  Streamlit UI   │ Interface web do usuário
+│  Streamlit UI   │  ← Interface web do usuário
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│   FastAPI       │ Backend REST API
-│   - /emails     │ Processamento de emails
-│   - /chat       │ Chat com agente
+│    FastAPI      │
+│  ├── /emails   │  ← Processamento de emails
+│  ├── /chat     │  ← Chat com agente
+│  └── /calendar │  ← Criação de eventos
 └────────┬────────┘
          │
-    ┌────┴─────┬──────────┬──────────┐
-    │          │          │          │
-┌───▼───┐  ┌──▼──┐   ┌───▼────┐ ┌──▼──────┐
-│ Gmail │  │Groq │   │Pinecone│ │Calendar │
-│  API  │  │ LLM │   │   RAG  │ │   API   │
-└───────┘  └─────┘   └────────┘ └─────────┘
+┌────────┴──────────────────────────┐
+│                                   │
+▼          ▼          ▼             ▼
+┌──────┐ ┌──────┐ ┌──────────┐ ┌──────────┐
+│Gmail │ │Groq  │ │Pinecone  │ │Google    │
+│ API  │ │ LLM  │ │  (RAG)   │ │Calendar  │
+└──────┘ └──────┘ └──────────┘ └──────────┘
+```
 
 ### **Estrutura**
-
+```
 ai-email-intelligence/
 │
 ├── app/
 │   ├── api/
-│   │   ├── email_routes.py      # Endpoints de emails
-│   │   └── chat_routes.py       # Endpoints de chat
+│   │   ├── email_routes.py       # Endpoints de emails
+│   │   ├── chat_routes.py        # Endpoints de chat
+│   │   └── calendar_routes.py    # Endpoints de calendário
 │   │
 │   ├── services/
-│   │   ├── gmail_service.py     # Integração Gmail API
-│   │   ├── email_service.py     # Classificação e processamento
-│   │   ├── rag_service.py       # Busca vetorial (Pinecone)
-│   │   ├── agent_service.py     # Agente IA (LangGraph)
-│   │   └── calendar_service.py  # Integração Google Calendar
+│   │   ├── gmail_service.py      # Integração Gmail API
+│   │   ├── email_service.py      # Classificação e processamento
+│   │   ├── rag_service.py        # Busca vetorial (Pinecone)
+│   │   ├── agent_service.py      # Agente IA (LangGraph)
+│   │   ├── calendar_service.py   # Integração Google Calendar
+│   │   ├── cache_service.py      # Cache de classificações
+│   │   ├── reranker_service.py   # Reranking de resultados
+│   │   └── query_expansion_service.py  # Expansão de queries
 │   │
 │   ├── models/
-│   │   └── schemas.py           # Modelos Pydantic
+│   │   └── schemas.py            # Modelos Pydantic
 │   │
-│   ├── config.py                # Configurações centralizadas
-│   └── main.py                  # Aplicação FastAPI
+│   ├── config.py                 # Configurações centralizadas
+│   └── main.py                   # Aplicação FastAPI
 │
 ├── ui/
-│   └── streamlit_app.py         # Interface Streamlit
+│   └── streamlit_app.py          # Interface Streamlit
 │
 ├── data/
+│   ├── cache/
+│   │   └── classification_cache.json
 │   └── emails-processed/
-│       └── processed.json       # Cache de emails processados
+│       └── processed.json
 │
-├── credentials.json             # Credenciais Google API
-├── token.json                   # Token Gmail
-├── token_calendar.json          # Token Calendar
-├── .env                         # Variáveis de ambiente
-├── requirements.txt             # Dependências Python
-├── docker-compose.yml           # Orquestração Docker
+├── credentials.json              # Credenciais Google API
+├── token.json                    # Token Gmail
+├── token_calendar.json           # Token Calendar
+├── .env                          # Variáveis de ambiente
+├── requirements.txt              # Dependências Python
+├── docker-compose.yml            # Orquestração Docker
 └── README.md
+```
 
 ### **Tecnologias Utilizadas Backend**
 
